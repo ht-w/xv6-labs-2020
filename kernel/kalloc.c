@@ -80,3 +80,17 @@ kalloc(void)
     memset((char*)r, 5, PGSIZE); // fill with junk
   return (void*)r;
 }
+
+
+uint64 
+get_free_memory(){
+  uint64 count = 0;
+  acquire(&kmem.lock); // 先加锁
+  struct run *free_pagelist = kmem.freelist;
+  while(free_pagelist){ // 遍历这个链表
+    free_pagelist = free_pagelist->next;
+    count++;
+  }
+  release(&kmem.lock);
+  return count * PGSIZE; // 返回时，需要乘以一个页的大小
+}
